@@ -27,9 +27,10 @@ class TaskListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val taskListAdapter = TaskListAdapter(taskList)
+        val taskListAdapter = TaskListAdapter()
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.adapter = taskListAdapter
+        taskListAdapter.submitList(taskList)
         floating_button.setOnClickListener {
             taskList.add(
                 Task(
@@ -37,7 +38,7 @@ class TaskListFragment : Fragment() {
                     title = "Task ${taskList.size + 1}"
                 )
             )
-            taskListAdapter.notifyDataSetChanged()
+            taskListAdapter.submitList(taskList)
         }
     }
 }
