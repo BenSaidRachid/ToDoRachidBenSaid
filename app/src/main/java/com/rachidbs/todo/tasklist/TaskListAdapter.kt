@@ -8,11 +8,22 @@ import com.rachidbs.todo.databinding.ItemTaskBinding
 
 class TaskListAdapter :
     ListAdapter<Task, TaskListAdapter.TaskViewHolder>(TasksDiffCallback) {
+    var onDeleteTask: ((Task) -> Unit)? = null
+    var onEditTask: ((Task) -> Unit)? = null
+    var onLongClick: ((Task) -> Unit)? = null
 
     inner class TaskViewHolder(private val binding: ItemTaskBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(task: Task) {
+
             binding.task = task
+            binding.deleteButton.setOnClickListener { onDeleteTask?.invoke(task) }
+            binding.editButton.setOnClickListener { onEditTask?.invoke(task) }
+            binding.root.setOnLongClickListener {
+                onLongClick?.invoke(task)
+                true
+            }
+
         }
     }
 
