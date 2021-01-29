@@ -8,61 +8,104 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rachidbs.todo.databinding.FragmentTaskListBinding
+import com.rachidbs.todo.network.Api
+import com.rachidbs.todo.network.TasksRepository
 import com.rachidbs.todo.task.TaskActivity
+import kotlinx.coroutines.launch
+import kotlinx.serialization.ExperimentalSerializationApi
 
+@ExperimentalSerializationApi
 class TaskListFragment : Fragment() {
-    private val taskList = mutableListOf(
-        Task(id = "id_1", title = "Task 1", description = "description 1"),
-        Task(id = "id_2", title = "Task 2"),
-        Task(id = "id_3", title = "Task 3")
-    )
+    private val tasksRepository = TasksRepository()
     private lateinit var binding: FragmentTaskListBinding
     private lateinit var taskListAdapter: TaskListAdapter
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentTaskListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
 
+    override fun onResume() {
+        super.onResume()
+
+        fetchUserInfo()
+        fetchTasks()
+    }
+
+    private fun fetchUserInfo() {
+        lifecycleScope.launch {
+            val userInfo = Api.userService.getInfo().body()!!
+            binding.userInfo.text = "${userInfo.firstName} ${userInfo.lastName}"
+        }
+    }
+
+    private fun fetchTasks() {
+        lifecycleScope.launch {
+            tasksRepository.refresh()
+        }
+    }
+
+    private fun deleteTask(task: Task) {
+        lifecycleScope.launch {
+            tasksRepository.deleteTask(task)
+        }
+    }
+
+    private fun addTask(task: Task) {
+        lifecycleScope.launch {
+            tasksRepository.addTask(task)
+        }
+    }
+
+    private fun updateTask(task: Task) {
+        lifecycleScope.launch {
+            tasksRepository.updateTask(task)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val startForResult =
+        val resultCreateTask =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     val newTask = result.data!!.getSerializableExtra(TaskActivity.NEW_TASK) as Task
-                    val id = taskList.indexOfFirst {
-                        it.id == newTask.id
-                    }
-                    if (id < 0) {
-                        taskList.add(
-                            newTask
-                        )
-                    } else {
-                        taskList[id] = newTask
-                    }
-                    taskListAdapter.submitList(taskList.toList())
+                    addTask(newTask)
                 }
             }
 
+        val resultEditTask =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val newTask = result.data!!.getSerializableExtra(TaskActivity.NEW_TASK) as Task
+                    updateTask(newTask)
+                }
+            }
         taskListAdapter = TaskListAdapter()
         binding.recyclerView.layoutManager = LinearLayoutManager(activity)
         binding.recyclerView.adapter = taskListAdapter
+
+        tasksRepository.taskList.observe(viewLifecycleOwner, Observer {
+            taskListAdapter.submitList(it)
+        })
+
         taskListAdapter.onDeleteTask = {
-            taskList.remove(it)
-            taskListAdapter.submitList(taskList.toList())
+            deleteTask(it)
         }
+
 
 
         if (activity?.intent?.action == Intent.ACTION_SEND) {
             val description = activity?.intent?.getStringExtra(Intent.EXTRA_TEXT)
             val newIntent = Intent(activity, TaskActivity::class.java)
             newIntent.putExtra(TaskActivity.SHARE_TASK, description)
-            startForResult.launch(newIntent)
+            resultCreateTask.launch(newIntent)
         }
 
         taskListAdapter.onLongClick = { task ->
@@ -78,13 +121,12 @@ class TaskListFragment : Fragment() {
         taskListAdapter.onEditTask = {
             val intent = Intent(activity, TaskActivity::class.java)
             intent.putExtra(TaskActivity.EDIT_TASK, it)
-            startForResult.launch(intent)
+            resultEditTask.launch(intent)
         }
-        taskListAdapter.submitList(taskList.toList())
 
         binding.floatingButton.setOnClickListener {
             val intent = Intent(activity, TaskActivity::class.java)
-            startForResult.launch(intent)
+            resultCreateTask.launch(intent)
         }
     }
 }
