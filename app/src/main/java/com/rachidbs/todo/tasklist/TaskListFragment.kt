@@ -8,21 +8,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rachidbs.todo.databinding.FragmentTaskListBinding
 import com.rachidbs.todo.network.Api
-import com.rachidbs.todo.network.TasksRepository
 import com.rachidbs.todo.task.TaskActivity
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @ExperimentalSerializationApi
 class TaskListFragment : Fragment() {
-    private val tasksRepository = TasksRepository()
     private lateinit var binding: FragmentTaskListBinding
     private lateinit var taskListAdapter: TaskListAdapter
+    private val tasksViewModel: TaskListViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -32,12 +32,10 @@ class TaskListFragment : Fragment() {
         return binding.root
     }
 
-
     override fun onResume() {
         super.onResume()
-
         fetchUserInfo()
-        fetchTasks()
+        tasksViewModel.loadTasks()
     }
 
     private fun fetchUserInfo() {
@@ -47,36 +45,12 @@ class TaskListFragment : Fragment() {
         }
     }
 
-    private fun fetchTasks() {
-        lifecycleScope.launch {
-            tasksRepository.refresh()
-        }
-    }
-
-    private fun deleteTask(task: Task) {
-        lifecycleScope.launch {
-            tasksRepository.deleteTask(task)
-        }
-    }
-
-    private fun addTask(task: Task) {
-        lifecycleScope.launch {
-            tasksRepository.addTask(task)
-        }
-    }
-
-    private fun updateTask(task: Task) {
-        lifecycleScope.launch {
-            tasksRepository.updateTask(task)
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val resultCreateTask =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     val newTask = result.data!!.getSerializableExtra(TaskActivity.NEW_TASK) as Task
-                    addTask(newTask)
+                    tasksViewModel.createTask(newTask)
                 }
             }
 
@@ -84,22 +58,20 @@ class TaskListFragment : Fragment() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     val newTask = result.data!!.getSerializableExtra(TaskActivity.NEW_TASK) as Task
-                    updateTask(newTask)
+                    tasksViewModel.updateTask(newTask)
                 }
             }
         taskListAdapter = TaskListAdapter()
         binding.recyclerView.layoutManager = LinearLayoutManager(activity)
         binding.recyclerView.adapter = taskListAdapter
 
-        tasksRepository.taskList.observe(viewLifecycleOwner, Observer {
+        tasksViewModel.taskList.observe(viewLifecycleOwner, Observer {
             taskListAdapter.submitList(it)
         })
 
         taskListAdapter.onDeleteTask = {
-            deleteTask(it)
+            tasksViewModel.deleteTask(it)
         }
-
-
 
         if (activity?.intent?.action == Intent.ACTION_SEND) {
             val description = activity?.intent?.getStringExtra(Intent.EXTRA_TEXT)
