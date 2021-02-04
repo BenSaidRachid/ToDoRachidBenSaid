@@ -40,8 +40,8 @@ object Api {
         .build()
 
     @ExperimentalSerializationApi
-    val userService: UserService by lazy {
-        retrofit.create(UserService::class.java)
+    val USER_WEB_SERVICE: UserWebService by lazy {
+        retrofit.create(UserWebService::class.java)
     }
 
     @ExperimentalSerializationApi

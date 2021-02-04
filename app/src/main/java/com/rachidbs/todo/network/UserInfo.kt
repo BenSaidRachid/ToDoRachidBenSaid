@@ -10,5 +10,7 @@ data class UserInfo(
     @SerialName("firstname")
     val firstName: String,
     @SerialName("lastname")
-    val lastName: String
+    val lastName: String,
+    @SerialName("avatar")
+    val avatar: String = "https://play-lh.googleusercontent.com/uX9l3XFeyyAz7on2xTyZVgMsxsYbdHUGeCV_SC7bMHjUZqkjNQxFdp8MlX_X6izOa9kR=s360"
 )

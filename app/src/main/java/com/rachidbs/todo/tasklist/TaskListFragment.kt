@@ -12,9 +12,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.rachidbs.todo.databinding.FragmentTaskListBinding
 import com.rachidbs.todo.network.Api
 import com.rachidbs.todo.task.TaskActivity
+import com.rachidbs.todo.userInfo.UserInfoActivity
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 
@@ -36,16 +39,14 @@ class TaskListFragment : Fragment() {
         super.onResume()
         fetchUserInfo()
         tasksViewModel.loadTasks()
-        binding.avatar.load("https://goo.gl/gEgYUd"){
-            transformations(CircleCropTransformation())
-        };
     }
 
-    private fun fetchUserInfo() {
-        lifecycleScope.launch {
-            val userInfo = Api.userService.getInfo().body()!!
-            binding.userInfo.text = "${userInfo.firstName} ${userInfo.lastName}"
-        }
+    private fun fetchUserInfo() =  lifecycleScope.launch {
+        val userInfo = Api.USER_WEB_SERVICE.getInfo().body()!!
+        binding.userInfo.text = "${userInfo.firstName} ${userInfo.lastName}"
+        binding.avatar.load(userInfo.avatar) {
+            transformations(CircleCropTransformation())
+        };
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,6 +75,10 @@ class TaskListFragment : Fragment() {
 
         taskListAdapter.onDeleteTask = {
             tasksViewModel.deleteTask(it)
+        }
+
+        binding.avatar.setOnClickListener {
+            startActivity(Intent(activity, UserInfoActivity::class.java))
         }
 
         if (activity?.intent?.action == Intent.ACTION_SEND) {
