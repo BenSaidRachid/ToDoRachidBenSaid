@@ -36,6 +36,9 @@ class TaskListFragment : Fragment() {
         super.onResume()
         fetchUserInfo()
         tasksViewModel.loadTasks()
+        binding.avatar.load("https://goo.gl/gEgYUd"){
+            transformations(CircleCropTransformation())
+        };
     }
 
     private fun fetchUserInfo() {
