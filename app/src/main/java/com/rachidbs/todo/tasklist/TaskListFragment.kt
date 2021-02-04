@@ -10,15 +10,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.rachidbs.todo.databinding.FragmentTaskListBinding
-import com.rachidbs.todo.network.Api
 import com.rachidbs.todo.task.TaskActivity
 import com.rachidbs.todo.userInfo.UserInfoActivity
-import kotlinx.coroutines.launch
+import com.rachidbs.todo.userInfo.UserInfoViewModel
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @ExperimentalSerializationApi
@@ -26,6 +24,8 @@ class TaskListFragment : Fragment() {
     private lateinit var binding: FragmentTaskListBinding
     private lateinit var taskListAdapter: TaskListAdapter
     private val tasksViewModel: TaskListViewModel by viewModels()
+    private val userViewModel: UserInfoViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,16 +37,8 @@ class TaskListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        fetchUserInfo()
+        userViewModel.loadInfo()
         tasksViewModel.loadTasks()
-    }
-
-    private fun fetchUserInfo() =  lifecycleScope.launch {
-        val userInfo = Api.USER_WEB_SERVICE.getInfo().body()!!
-        binding.userInfo.text = "${userInfo.firstName} ${userInfo.lastName}"
-        binding.avatar.load(userInfo.avatar) {
-            transformations(CircleCropTransformation())
-        };
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -71,6 +63,13 @@ class TaskListFragment : Fragment() {
 
         tasksViewModel.taskList.observe(viewLifecycleOwner, Observer {
             taskListAdapter.submitList(it)
+        })
+
+        userViewModel.user.observe(viewLifecycleOwner, { userInfo ->
+            binding.userInfo.text = "${userInfo.firstName} ${userInfo.lastName}"
+            binding.avatar.load(userInfo.avatar) {
+                transformations(CircleCropTransformation())
+            };
         })
 
         taskListAdapter.onDeleteTask = {

@@ -1,15 +1,11 @@
 package com.rachidbs.todo.network
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.rachidbs.todo.tasklist.Task
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @ExperimentalSerializationApi
 class TasksRepository {
     private val webService = Api.tasksWebService
-    private val _taskList = MutableLiveData<List<Task>>()
-    val taskList: LiveData<List<Task>> = _taskList
 
     suspend fun loadTasks(): List<Task>? {
         val response = webService.getTasks()

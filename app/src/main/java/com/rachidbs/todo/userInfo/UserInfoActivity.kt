@@ -7,17 +7,16 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.lifecycle.lifecycleScope
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.rachidbs.todo.BuildConfig
 import com.rachidbs.todo.databinding.ActivityUserInfoBinding
-import com.rachidbs.todo.network.Api
-import kotlinx.coroutines.launch
+import com.rachidbs.todo.network.UserInfo
 import kotlinx.serialization.ExperimentalSerializationApi
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -28,19 +27,44 @@ class UserInfoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityUserInfoBinding;
     private val cameraPermissionMsg: String = "On a besoin de la caméra sivouplé ! 🥺"
     private val galleryPermissionMsg: String = "On a besoin de la galerie sivouplé ! 🥺"
+    private val userViewModel: UserInfoViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserInfoBinding.inflate(layoutInflater);
         setContentView(binding.root)
-        fetUserInfo()
+        userViewModel.user.observe(this, { userInfo ->
+            binding.editFirstName.setText(userInfo.firstName)
+            binding.editLastName.setText(userInfo.lastName)
+            binding.editEmail.setText(userInfo.email)
+            binding.imageView.load(userInfo.avatar) {
+                transformations(CircleCropTransformation())
+            };
+        })
     }
 
-    private fun fetUserInfo() = lifecycleScope.launch {
-        val userInfo = Api.USER_WEB_SERVICE.getInfo().body()!!
-        binding.imageView.load(userInfo.avatar) {
-            transformations(CircleCropTransformation())
-        };
+    override fun onResume() {
+        super.onResume()
+        userViewModel.loadInfo()
     }
+
+    fun editInfo(view: View) {
+        val firstName = binding.editFirstName.text.toString()
+        val lastName = binding.editLastName.text.toString()
+        val email = binding.editEmail.text.toString()
+        if (firstName.isEmpty() && lastName.isEmpty() && email.isEmpty())
+            Toast.makeText(this, "Vous devez au moins avoir un titre", Toast.LENGTH_LONG).show()
+        else {
+            userViewModel.updateInfo(
+                UserInfo(
+                    firstName = firstName,
+                    lastName = lastName,
+                    email = email
+                )
+            )
+        }
+    }
+
 
     fun takePictureClick(view: View) {
         askCameraPermissionAndOpenCamera()
@@ -67,11 +91,8 @@ class UserInfoActivity : AppCompatActivity() {
 
     private val pickInGallery =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            lifecycleScope.launch {
-                if (uri != null)
-                    Api.USER_WEB_SERVICE.updateAvatar(convert(uri)).body()!!;
-                    finish();
-            }
+            if (uri != null)
+                userViewModel.updateAvatar(convert(uri));
         }
 
     private fun convert(uri: Uri) =
@@ -82,10 +103,7 @@ class UserInfoActivity : AppCompatActivity() {
         )
 
     private fun handleImage(uri: Uri) {
-        lifecycleScope.launch {
-            Api.USER_WEB_SERVICE.updateAvatar(convert(uri)).body()!!;
-            finish();
-        }
+        userViewModel.updateAvatar(convert(uri));
     }
 
     private fun openCamera() = takePicture.launch(photoUri)

@@ -42,7 +42,7 @@ class TaskActivity : AppCompatActivity() {
             val title = binding.taskTitle.text.toString()
             val description = binding.taskDescription.text.toString()
             if (title.isEmpty())
-                Toast.makeText(this, "You have to at least enter a title", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Vous devez au moins avoir un titre", Toast.LENGTH_LONG).show()
             else {
                 val id = oldTask?.id ?: UUID.randomUUID().toString()
                 val newTask = Task(id = id, title = title, description = description)

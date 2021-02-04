@@ -1,29 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".userInfo.UserInfoActivity">
+
     <ImageView
         android:id="@+id/image_view"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center" />
+
+    <EditText
+        android:id="@+id/edit_first_name"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:layout_marginBottom="16dp"
+        android:hint="Prénom" />
+
+    <EditText
+        android:id="@+id/edit_last_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:layout_marginBottom="16dp"
+        android:hint="Nom" />
+
+    <EditText
+        android:id="@+id/edit_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textEmailAddress"
+        android:layout_marginBottom="16dp"
+        android:hint="Email"
+        />
+
+
+    <Button
+        android:id="@+id/edit_buttom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="editInfo"
+        android:text="Editer mes informations" />
 
     <Button
         android:id="@+id/upload_image_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Choisir une Image"
         android:onClick="pickInGalleryClick"
-        />
+        android:text="Choisir une Image" />
 
     <Button
         android:id="@+id/take_picture_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Prendre une photo"
         android:onClick="takePictureClick"
-        />
+        android:text="Prendre une photo" />
 </LinearLayout>
