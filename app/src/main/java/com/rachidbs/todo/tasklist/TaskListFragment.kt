@@ -7,16 +7,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import coil.transform.CircleCropTransformation
+import com.rachidbs.todo.auth.AuthenticationActivity
 import com.rachidbs.todo.databinding.FragmentTaskListBinding
 import com.rachidbs.todo.task.TaskActivity
 import com.rachidbs.todo.userInfo.UserInfoActivity
 import com.rachidbs.todo.userInfo.UserInfoViewModel
+import com.rachidbs.todo.utils.Constants
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @ExperimentalSerializationApi
@@ -76,6 +80,15 @@ class TaskListFragment : Fragment() {
             tasksViewModel.deleteTask(it)
         }
 
+        binding.logOut.setOnClickListener {
+            PreferenceManager.getDefaultSharedPreferences(context).edit {
+                putString(Constants.SHARED_PREF_TOKEN_KEY, null)
+            }
+            val newIntent = Intent(activity, AuthenticationActivity::class.java)
+            newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(newIntent)
+        }
+
         binding.avatar.setOnClickListener {
             startActivity(Intent(activity, UserInfoActivity::class.java))
         }
@@ -86,6 +99,7 @@ class TaskListFragment : Fragment() {
             newIntent.putExtra(TaskActivity.SHARE_TASK, description)
             resultCreateTask.launch(newIntent)
         }
+
 
         taskListAdapter.onLongClick = { task ->
             val shareIntent: Intent = Intent().apply {
