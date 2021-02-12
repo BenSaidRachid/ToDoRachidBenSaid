@@ -5,7 +5,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 
 @ExperimentalSerializationApi
 class TasksRepository {
-    private val webService = Api.tasksWebService
+    private val webService = Api.INSTANCE.tasksWebService
 
     suspend fun loadTasks(): List<Task>? {
         val response = webService.getTasks()

@@ -15,7 +15,6 @@ class TaskListAdapter :
     inner class TaskViewHolder(private val binding: ItemTaskBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(task: Task) {
-
             binding.task = task
             binding.deleteButton.setOnClickListener { onDeleteTask?.invoke(task) }
             binding.editButton.setOnClickListener { onEditTask?.invoke(task) }
