@@ -21,11 +21,13 @@ class AuthenticationFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val navController = findNavController();
+
         binding.logIn.setOnClickListener {
-            findNavController().navigate(R.id.action_authenticationFragment_to_loginFragment)
+            navController.navigate(R.id.action_authenticationFragment_to_loginFragment)
         }
         binding.signUp.setOnClickListener {
-            findNavController().navigate(R.id.action_authenticationFragment_to_signupFragment)
+            navController.navigate(R.id.action_authenticationFragment_to_signupFragment)
         }
     }
 }

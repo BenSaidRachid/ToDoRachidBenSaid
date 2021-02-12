@@ -13,8 +13,6 @@ import retrofit2.Retrofit
 class Api(private val context: Context) {
     companion object {
         private const val BASE_URL = "https://android-tasks-api.herokuapp.com/api/"
-        private const val TOKEN =
-            "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0NzYsImV4cCI6MTY0MzQ0MDM5Mn0.iDiAqDLSm5omXOeBOYRb5bNayzWbbq4WU1avpx3GJ1U"
         lateinit var INSTANCE: Api
     }
 
@@ -23,7 +21,7 @@ class Api(private val context: Context) {
         coerceInputValues = true
     }
 
-    private fun getToken(): String? {
+    fun getToken(): String? {
         return PreferenceManager.getDefaultSharedPreferences(context)
             .getString(Constants.SHARED_PREF_TOKEN_KEY, "")
     }

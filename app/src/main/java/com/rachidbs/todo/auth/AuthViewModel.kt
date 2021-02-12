@@ -11,14 +11,23 @@ import kotlinx.serialization.ExperimentalSerializationApi
 @ExperimentalSerializationApi
 class AuthViewModel : ViewModel() {
     private val repository = UserInfoRepository()
-    private val _response = MutableLiveData<LoginResponse>()
-    val response: LiveData<LoginResponse> = _response
+    private val _response = MutableLiveData<AuthResponse>()
+    val response: LiveData<AuthResponse> = _response
 
     fun login(form: LoginForm) {
         viewModelScope.launch {
-            val loginResponse: LoginResponse? = repository.login(form)
-            if (loginResponse != null)
-                _response.value = loginResponse
+            val authResponse: AuthResponse? = repository.login(form)
+            if (authResponse != null)
+                _response.value = authResponse!!
+        }
+    }
+
+
+    fun signUp(form: SignUpForm) {
+        viewModelScope.launch {
+            val authResponse: AuthResponse? = repository.signUp(form)
+            if (authResponse != null)
+                _response.value = authResponse!!
         }
     }
 }

@@ -3,8 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/authenticationFragment">
-
+    app:startDestination="@id/taskListFragment">
+    <fragment
+        android:id="@+id/taskListFragment"
+        android:name="com.rachidbs.todo.tasklist.TaskListFragment"
+        android:label="fragment_task_list"
+        tools:layout="@layout/fragment_task_list" >
+        <action
+            android:id="@+id/action_taskListFragment_to_authenticationFragment"
+            app:destination="@id/authenticationFragment" />
+        <action
+            android:id="@+id/action_taskListFragment_to_taskFragment"
+            app:destination="@id/taskFragment" />
+        <action
+            android:id="@+id/action_taskListFragment_to_userInfoFragment"
+            app:destination="@id/userInfoFragment" />
+    </fragment>
     <fragment
         android:id="@+id/authenticationFragment"
         android:name="com.rachidbs.todo.auth.AuthenticationFragment"
@@ -27,4 +41,15 @@
         android:name="com.rachidbs.todo.auth.SignupFragment"
         android:label="fragment_signup"
         tools:layout="@layout/fragment_signup" />
+
+    <fragment
+        android:id="@+id/taskFragment"
+        android:name="com.rachidbs.todo.task.TaskFragment"
+        android:label="fragment_task"
+        tools:layout="@layout/fragment_task" />
+    <fragment
+        android:id="@+id/userInfoFragment"
+        android:name="com.rachidbs.todo.userInfo.UserInfoFragment"
+        android:label="fragment_user_info"
+        tools:layout="@layout/fragment_user_info" />
 </navigation>
